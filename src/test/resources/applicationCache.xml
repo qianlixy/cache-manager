@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+	default-autowire="byName" default-lazy-init="true">
+	
+	<aop:config>
+		<aop:aspect ref="cacheManager">
+			<!-- 切面建议拦截在DAO层，但是使用CGLIB动态代理框架会有很多警告在日志中打印。-->
+			<!-- 也可以拦截Service层，但是注意更新业务逻辑并不会使缓存失效。 -->
+			<aop:around method="doCache" pointcut="execution(* io.github.qianlixy.cache.business.dao.*.*(..))"/>
+		</aop:aspect>
+	</aop:config>
+	
+	<!-- 方法匹配规则参数，拦截findAll()方法 -->
+	<bean id="methodMatchFilterConfigBean" class="io.github.qianlixy.cache.filter.MethodMatchFilterConfigBean">
+		<property name="pattern" value="business.dao.*.findAll()"></property>
+	</bean>
+	
+	<!-- 方法匹配规则 -->
+	<bean id="methodMatchFilterConfig" class="io.github.qianlixy.cache.filter.MethodMatchFilterConfig">
+		<property name="configBeans">
+			<list><ref bean="methodMatchFilterConfigBean"></ref></list>
+		</property>
+	</bean>
+	
+	<!-- 缓存管理器 -->
+	<bean id="cacheManager" class="io.github.qianlixy.cache.DefaultCacheManger" init-method="init">
+		<property name="cacheConfig">
+			<bean class="io.github.qianlixy.cache.CacheConfig">
+				<property name="dataSource" ref="dataSource"></property>
+				<property name="cacheClient" ref="memcachedClient"></property>
+				<property name="filterConfigs">
+					<list><ref bean="methodMatchFilterConfig"></ref></list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+</beans>
