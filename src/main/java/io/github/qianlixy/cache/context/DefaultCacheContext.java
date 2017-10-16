@@ -30,6 +30,8 @@ public class DefaultCacheContext implements CacheContext {
 	private String LAST_ALTER_TIME = "LAST_ALTER_TIME";
 	/** 源方法对应数据库表的映射key */
 	private String METHOD_TABLES_MAP = "METHOD_TABLES_MAP";
+	/** 保存在当前线程中方法类型的key */
+	private String THREAD_LOCAL_IS_QUERY_METHOD = "THREAD_LOCAL_IS_QUERY_METHOD";
 	
 	private CacheAdapter cacheAdapter;
 
@@ -62,12 +64,15 @@ public class DefaultCacheContext implements CacheContext {
 
 	@Override
 	public Boolean isQuery() {
+		Object isQuery = get(threadLocal);
+		if(null != isQuery) return isQuery();
 		Map<String, Boolean> isQueryMap = (Map<String, Boolean>) cacheAdapter.get(IS_QUERY_METHOD);
 		return null == isQueryMap ? null : isQueryMap.get(get(DYNAMIC_UNIQUE_MARK));
 	}
 
 	@Override
 	public void setQuery(boolean isQuery) {
+		set(THREAD_LOCAL_IS_QUERY_METHOD, isQuery);
 		Map<String, Boolean> isQueryMap = (Map<String, Boolean>) cacheAdapter.get(IS_QUERY_METHOD);
 		if(null == isQueryMap) {
 			isQueryMap = new HashMap<>();

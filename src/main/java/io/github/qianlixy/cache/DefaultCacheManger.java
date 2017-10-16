@@ -16,6 +16,8 @@ import io.github.qianlixy.cache.context.ConsistentTime;
 import io.github.qianlixy.cache.context.ConsistentTimeProvider;
 import io.github.qianlixy.cache.context.DefaultCacheContext;
 import io.github.qianlixy.cache.context.MD5CacheKeyProvider;
+import io.github.qianlixy.cache.exception.CacheNotExistException;
+import io.github.qianlixy.cache.exception.CacheOutOfDateException;
 import io.github.qianlixy.cache.exception.ConsistentTimeException;
 import io.github.qianlixy.cache.exception.ExecuteSourceMethodException;
 import io.github.qianlixy.cache.exception.InitCacheManagerException;
@@ -181,22 +183,33 @@ public class DefaultCacheManger implements CacheManager {
 			cacheContext.register(joinPoint, cacheKeyProvider);
 			//生成源方法缓存操作包装类
 			cacheProcesser = new DefaultCacheMethodProcesser(joinPoint, cacheContext);
-			//过滤器
-			FilterChain filterChain = new FilterChain();
-			try {
-				return filterChain.doFilter(cacheProcesser, filterChain);
-			} catch (NoFilterDealsException e) {
-				//没有缓存处理时，进行下面默认处理
-			}
-			//判断缓存有效性。有效返回缓存，无效执行源方法（记录缓存）并返回
 			Boolean isQuery = cacheContext.isQuery();
-			if(null != isQuery && isQuery) {
-				return cacheProcesser.getCache();
+			if (null == isQuery) {
+				//未知拦截方法是查询或修改方法，直接执行源方法
+				cacheProcesser.doProcess();
+				isQuery = cacheContext.isQuery();
 			}
-			return cacheProcesser.doProcessAndCache();
+			
+			if(isQuery) {
+				//拦截方法为查询方法时，依次调用过滤器
+				FilterChain filterChain = new FilterChain();
+				try {
+					return filterChain.doFilter(cacheProcesser, filterChain);
+				} catch (NoFilterDealsException e) {
+					//没有缓存处理时，进行下面默认处理
+					try {
+						return cacheProcesser.getCache();
+					} catch (CacheOutOfDateException | CacheNotExistException e1) {
+						return cacheProcesser.doProcessAndCache();
+					}
+				}
+			}
+			//修改方法直接返回结果
+			return cacheProcesser.doProcess();
 		} catch(ExecuteSourceMethodException e) {
 			throw e;
 		} catch(Throwable th) {
+			LOGGER.error("Occur exception while dealing cache.", th);
 			return null == cacheProcesser ? joinPoint.proceed() : cacheProcesser.doProcessAndCache();
 		}
 	}
