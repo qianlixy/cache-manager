@@ -3,12 +3,26 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.qianlixy</groupId>
 	<artifactId>cache-manager</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.0-SNAPSHOT</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 	</properties>
+	
+	<distributionManagement>
+		<repository>
+	        <id>YAPPAM_MAVEN</id>
+	        <name>YAPPAM_MAVEN-releases</name>
+	        <url>http://192.168.0.176/components/libs-release-local</url>
+	    </repository>
+		<snapshotRepository>
+			<id>YAPPAM_MAVEN</id>
+			<name>YAPPAM_MAVEN-snapshots</name>
+			<url>http://192.168.0.176/components/libs-snapshot-local</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
 
 	<dependencies>
 		<!-- test -->
