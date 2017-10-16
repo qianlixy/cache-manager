@@ -191,9 +191,7 @@ public class DefaultCacheManger implements CacheManager {
 			//判断缓存有效性。有效返回缓存，无效执行源方法（记录缓存）并返回
 			Boolean isQuery = cacheContext.isQuery();
 			if(null != isQuery && isQuery) {
-				Object cache = cacheProcesser.getCache();
-				LOGGER.debug("Use cache-client data on [{}]", joinPoint.getSignature().toLongString());
-				return cache;
+				return cacheProcesser.getCache();
 			}
 			return cacheProcesser.doProcessAndCache();
 		} catch(ExecuteSourceMethodException e) {

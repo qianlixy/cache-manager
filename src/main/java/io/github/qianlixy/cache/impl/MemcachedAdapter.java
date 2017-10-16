@@ -38,7 +38,7 @@ public class MemcachedAdapter implements CacheAdapter {
 	@Override
 	public boolean set(final String key, final Object value, final int time) {
 		try {
-			return client.set(key, time * 60000, value);
+			return client.set(key, time * 60, value);
 		} catch (TimeoutException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {

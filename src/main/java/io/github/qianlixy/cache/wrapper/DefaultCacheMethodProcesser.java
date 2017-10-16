@@ -41,7 +41,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 
 	@Override
 	public void putCache(Object source) throws ConsistentTimeException {
-		putCache(source, ApplicationContext.getDefaultCacheTime());
+		putCache(source, cacheTime);
 	}
 	
 	@Override
@@ -82,6 +82,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 		}
 		
 		//缓存存在，没有超时失效，返回有效缓存
+		LOGGER.debug("Use cached client data on [{}]", cacheContext.toString());
 		return cache instanceof Null ? null : cache;
 	}
 
@@ -125,10 +126,9 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 		return executResult.get();
 	}
 
-
 	@Override
 	public Object doProcessAndCache() throws ConsistentTimeException, ExecuteSourceMethodException {
-		return doProcessAndCache(ApplicationContext.getDefaultCacheTime());
+		return doProcessAndCache(cacheTime);
 	}
 
 	@Override

@@ -59,11 +59,6 @@ public class MethodMatchFilter extends ConfigurableFilter<MethodMatchFilterConfi
 	 * @return 是否匹配成功
 	 */
 	public boolean matchMethod(MethodMatchFilterConfigBean config, String className, String methodName) {
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("The matching result is [{}]. Use [{}] to match [{}]", 
-					config.getPattern().matcher(className + "." + methodName + "()").find(),
-					config.getPattern(), className + "." + methodName + "()");
-		}
 		return config.getPattern().matcher(className + "." + methodName + "()").find();
 	}
 
@@ -76,7 +71,17 @@ public class MethodMatchFilter extends ConfigurableFilter<MethodMatchFilterConfi
 		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 		for (int i=0; i<stackTrace.length && i<filterConfig.getLevel(); i++) {
 			StackTraceElement element = stackTrace[i];
-			if(matchMethod(config, element.getClassName(), element.getMethodName())) return true;
+			if(matchMethod(config, element.getClassName(), element.getMethodName())) {
+				if(LOGGER.isDebugEnabled()) {
+					LOGGER.debug("The matching result is [{}]. Use [{}] to match [{}]", 
+							true, config.getPattern(), element.getClassName() + "." + element.getMethodName() + "()");
+				}
+				return true;
+			}
+		}
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("The matching result is [{}]. Use [{}] to match StackTraceElement", 
+					false, config.getPattern());
 		}
 		return false;
 	}
