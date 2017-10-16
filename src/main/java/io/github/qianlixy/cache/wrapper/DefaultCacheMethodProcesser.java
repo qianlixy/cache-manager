@@ -23,8 +23,8 @@ import io.github.qianlixy.cache.exception.ExecuteSourceMethodException;
  */
 public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	
-	//TODO 需要重构一个线程中只能执行一次源方法
-	private ThreadLocal<Object> executResult = new ThreadLocal<>();
+	private Thread lastThread;
+	private Object sourceData;
 	
 	private ProceedingJoinPoint joinPoint;
 	private CacheContext cacheContext;
@@ -37,6 +37,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 		this.cacheContext = cacheContext;
 		this.cacheAdapter = ApplicationContext.getCacheAdaperFactory().buildCacheAdapter();
 		this.cacheTime = ApplicationContext.getDefaultCacheTime();
+		this.lastThread = Thread.currentThread();
 	}
 
 	@Override
@@ -46,12 +47,12 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	
 	@Override
 	public void putCache(Object source, int time) throws ConsistentTimeException {
-		cacheAdapter.set(cacheContext.getDynamicUniqueMark(), 
-				null == source ? new Null() : source, time);
+		cacheAdapter.set(cacheContext.getDynamicUniqueMark(), wrap(source), time);
 		cacheContext.setLastQueryTime(ApplicationContext.getConsistentTimeProvider().newInstance());
 	}
 	
 	@Override
+	//TODO 将缓存数据保存在当前线程一份，防止多次向缓存客户端获取缓存
 	public Object getCache() throws CacheOutOfDateException, CacheNotExistException {
 		//获取缓存
 		Object cache = cacheAdapter.get(cacheContext.getDynamicUniqueMark());
@@ -83,7 +84,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 		
 		//缓存存在，没有超时失效，返回有效缓存
 		LOGGER.debug("Use cached client data on [{}]", cacheContext.toString());
-		return cache instanceof Null ? null : cache;
+		return unwrap(cache);
 	}
 
 	@Override
@@ -113,17 +114,17 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 
 	@Override
 	public Object doProcess() throws ExecuteSourceMethodException {
-		if(null == executResult.get()) {
+		if(null == sourceData || lastThread != Thread.currentThread()) {
+			//源数据为空或者新线程中执行源方法，获取源数据
 			LOGGER.debug("Start execute source method [{}]", getFullMethodName());
-			Object result = null;
 			try {
-				result = joinPoint.proceed();
+				sourceData = wrap(joinPoint.proceed());
+				lastThread = Thread.currentThread();
 			} catch (Throwable e) {
 				throw new ExecuteSourceMethodException(e);
 			}
-			executResult.set(result);
 		}
-		return executResult.get();
+		return unwrap(sourceData);
 	}
 
 	@Override
@@ -148,6 +149,24 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	@Override
 	public void setCacheTime(int cacheTime) {
 		this.cacheTime = cacheTime;
+	}
+	
+	/**
+	 * 包装对象，如果为null返回{@link Null}
+	 * @param obj 源对象
+	 * @return 包装后的对象
+	 */
+	private Object wrap(Object obj) {
+		return null == obj ? new Null() : obj;
+	}
+	
+	/**
+	 * 解包对象，如果包装对象类型为{@link Null}将返回null，否则返回源对象
+	 * @param obj 包装对象
+	 * @return 解包后对象
+	 */
+	private Object unwrap(Object obj) {
+		return obj instanceof Null ? null : obj;
 	}
 	
 }
