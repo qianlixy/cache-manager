@@ -68,7 +68,9 @@ public class DruidSQLParser extends FilterEventAdapter implements SQLParser {
 							|| tableStat.getDeleteCount() > 0) {
 						context.setTableLastAlterTime(tableName.toLowerCase(), 
 								ApplicationContext.getConsistentTimeProvider().newInstance());
-						if (!isAlter) isAlter = true;
+						if (!isAlter) {
+							isAlter = true;
+						}
 					}
 				}
 			}

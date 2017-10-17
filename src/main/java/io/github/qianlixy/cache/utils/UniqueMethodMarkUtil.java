@@ -9,11 +9,15 @@ public class UniqueMethodMarkUtil {
 	private static final String NULL = "null";
 	
 	public static String paramValue(Object param) {
-		if(null == param) return NULL;
-		if(param.getClass().isPrimitive() || isWrapClass(param.getClass())) 
+		if(null == param) {
+			return NULL;
+		}
+		if(param.getClass().isPrimitive() || isWrapClass(param.getClass())) {
 			return String.valueOf(param);
-		if(param instanceof String) 
+		}
+		if(param instanceof String) {
 			return (String) param;
+		}
 		return JSONObject.toJSONString(param);
 	}
 	
@@ -40,15 +44,17 @@ public class UniqueMethodMarkUtil {
 					for (int i=0; i<arrayLength; i++) {
 						mark.append(BaseDataTypeArrayUtil.arrayValue(val, i)).append(",");
 					}
-					if (arrayLength > 0)
+					if (arrayLength > 0) {
 						mark.deleteCharAt(mark.length() - 1);
+					}
 					mark.append("],");
 				} else {
 					mark.append(paramValue(val)).append(",");
 				}
 			}
-			if (params.length > 0)
+			if (params.length > 0) {
 				mark.deleteCharAt(mark.length() - 1);
+			}
 		}
 		mark.append(")");
 		return mark.toString();

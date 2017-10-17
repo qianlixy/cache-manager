@@ -131,7 +131,9 @@ public class DefaultCacheManger implements CacheManager {
 				throw new InitCacheManagerException("AbstractCacheClientFactory and CacheClientAdapter cannot be null at the same time");
 			}
 			AbstractCacheAdapterFactory<?> factory = AbstractCacheAdapterFactory.buildFactory(cacheConfig.getCacheClient());
-			if(null == factory) throw new InitCacheManagerException("Need to configurate AbstractCacheClientFactory instance because cache clients that are not supported");
+			if(null == factory) {
+				throw new InitCacheManagerException("Need to configurate AbstractCacheClientFactory instance because cache clients that are not supported");
+			}
 			cacheConfig.setCacheClientFactory(factory);
 		}
 	}
@@ -175,37 +177,41 @@ public class DefaultCacheManger implements CacheManager {
 	@Override
 	public Object doCache(ProceedingJoinPoint joinPoint) throws Throwable {
 		//配置参数是否管理缓存为false，直接执行源代码并返回
-		if(!cacheConfig.isManageCache()) return joinPoint.proceed();
+		if(!cacheConfig.isManageCache()) {
+			return joinPoint.proceed();
+		}
 		//管理缓存
 		CacheMethodProcesser cacheProcesser = null;
 		try {
 			//注册拦截源方法
 			cacheContext.register(joinPoint, cacheKeyProvider);
-			//生成源方法缓存操作包装类
-			cacheProcesser = new DefaultCacheMethodProcesser(joinPoint, cacheContext);
 			Boolean isQuery = cacheContext.isQuery();
+			Object source = null;
 			if (null == isQuery) {
 				//未知拦截方法是查询或修改方法，直接执行源方法
-				cacheProcesser.doProcess();
+				source = joinPoint.proceed();
 				isQuery = cacheContext.isQuery();
 			}
+			//非查询方法不执行拦截器
+			if(!isQuery) {
+				return source;
+			}
 			
-			if(isQuery) {
-				//拦截方法为查询方法时，依次调用过滤器
-				FilterChain filterChain = new FilterChain();
+			//生成源方法缓存操作包装类对象
+			cacheProcesser = new DefaultCacheMethodProcesser(joinPoint, cacheContext);
+			
+			//拦截方法为查询方法时，依次调用过滤器
+			FilterChain filterChain = new FilterChain();
+			try {
+				return filterChain.doFilter(cacheProcesser, filterChain);
+			} catch (NoFilterDealsException e) {
+				//没有缓存处理时，进行下面默认处理
 				try {
-					return filterChain.doFilter(cacheProcesser, filterChain);
-				} catch (NoFilterDealsException e) {
-					//没有缓存处理时，进行下面默认处理
-					try {
-						return cacheProcesser.getCache();
-					} catch (CacheOutOfDateException | CacheNotExistException e1) {
-						return cacheProcesser.doProcessAndCache();
-					}
+					return cacheProcesser.getCache();
+				} catch (CacheOutOfDateException | CacheNotExistException e1) {
+					return cacheProcesser.doProcessAndCache();
 				}
 			}
-			//修改方法直接返回结果
-			return cacheProcesser.doProcess();
 		} catch(ExecuteSourceMethodException e) {
 			throw e;
 		} catch(Throwable th) {

@@ -50,7 +50,9 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	@Override
 	public Map<String, Object> find(Integer id) {
 		List<Map<String, Object>> list = getJdbcTemplate().queryForList("SELECT * FROM USER WHERE ID = ?", id);
-		if(null == list || list.size() < 1) return null;
+		if(null == list || list.size() < 1) {
+			return null;
+		}
 		return list.get(0);
 	}
 	

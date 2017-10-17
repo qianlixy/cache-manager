@@ -23,13 +23,16 @@ import io.github.qianlixy.cache.exception.ExecuteSourceMethodException;
  */
 public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	
-	private Thread lastThread;
 	private Object sourceData;
+	private Object cachedData;
+	private boolean isOutOfDate;
 	
 	private ProceedingJoinPoint joinPoint;
 	private CacheContext cacheContext;
 	private CacheAdapter cacheAdapter;
 	private int cacheTime;
+	
+	private String fullMethodName;
 	
 	public DefaultCacheMethodProcesser(ProceedingJoinPoint joinPoint, 
 			CacheContext cacheContext) throws IOException {
@@ -37,7 +40,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 		this.cacheContext = cacheContext;
 		this.cacheAdapter = ApplicationContext.getCacheAdaperFactory().buildCacheAdapter();
 		this.cacheTime = ApplicationContext.getDefaultCacheTime();
-		this.lastThread = Thread.currentThread();
+		this.fullMethodName = joinPoint.getSignature().toLongString();
 	}
 
 	@Override
@@ -52,31 +55,51 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	}
 	
 	@Override
-	//TODO 将缓存数据保存在当前线程一份，防止多次向缓存客户端获取缓存
 	public Object getCache() throws CacheOutOfDateException, CacheNotExistException {
+		return unwrap(getCacheWithWrap());
+	}
+
+	/**
+	 * 获取包装类型的缓存
+	 * @return 包装类型的缓存
+	 */
+	private Object getCacheWithWrap() {
+		//备份结果，一个线程中只执行缓存客户端查询
+		if(null != cachedData) {
+			return cachedData;
+		}
+		if(isOutOfDate) {
+			return null;
+		}
 		//获取缓存
 		Object cache = cacheAdapter.get(cacheContext.getDynamicUniqueMark());
 		
 		//缓存为null，抛出缓存不存在异常
-		if(null == cache) throw new CacheNotExistException();
+		if(null == cache) {
+			throw new CacheNotExistException();
+		}
 		
 		//获取源方法关联表的修改时间
-		Set<Long> lastAlterTime = new HashSet<>();
 		Collection<String> methodTalbeMap = cacheContext.getTables();
-		
-		//找不到源方法对应的表，说明还没有查询过，所以直接返回null
-		if(null == methodTalbeMap) return null;
+		//找不到源方法对应的表，说明还没有查询过，抛出缓存不存在异常
+		if(null == methodTalbeMap || methodTalbeMap.size() <= 0) {
+			throw new CacheNotExistException();
+		}
+		Set<Long> lastAlterTime = new HashSet<>();
 		
 		//判断缓存是否超时失效
 		for (String table : methodTalbeMap) {
 			long time = cacheContext.getTableLastAlterTime(table);
-			if(time > 0) lastAlterTime.add(time);
+			if(time > 0) {
+				lastAlterTime.add(time);
+			}
 		}
 		if (lastAlterTime.size() > 0) {
 			long lastQueryTime = cacheContext.getLastQueryTime();
 			for (Long alterTime : lastAlterTime) {
 				if(alterTime > lastQueryTime) {
 					LOGGER.debug("Cached data is out of date on [{}]", cacheContext.toString());
+					isOutOfDate = true;
 					throw new CacheOutOfDateException();
 				}
 			}
@@ -84,7 +107,8 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 		
 		//缓存存在，没有超时失效，返回有效缓存
 		LOGGER.debug("Use cached client data on [{}]", cacheContext.toString());
-		return unwrap(cache);
+		cachedData = cache;
+		return cache;
 	}
 
 	@Override
@@ -109,22 +133,31 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	
 	@Override
 	public String getFullMethodName() {
-		return joinPoint.getSignature().toLongString();
+		return fullMethodName;
 	}
 
 	@Override
 	public Object doProcess() throws ExecuteSourceMethodException {
-		if(null == sourceData || lastThread != Thread.currentThread()) {
-			//源数据为空或者新线程中执行源方法，获取源数据
-			LOGGER.debug("Start execute source method [{}]", getFullMethodName());
-			try {
-				sourceData = wrap(joinPoint.proceed());
-				lastThread = Thread.currentThread();
-			} catch (Throwable e) {
-				throw new ExecuteSourceMethodException(e);
-			}
+		return unwrap(doProcessWithWrap());
+	}
+	
+	/**
+	 * 执行源方法，并返回包装类型数据
+	 * @return 包装类型数据
+	 * @throws ExecuteSourceMethodException 抛出执行源方法可能会出现的异常
+	 */
+	private Object doProcessWithWrap() throws ExecuteSourceMethodException {
+		//备份结果，一个线程中只执行一次源方法
+		if(null != sourceData) {
+			return sourceData;
 		}
-		return unwrap(sourceData);
+		try {
+			sourceData = joinPoint.proceed();
+		} catch (Throwable e) {
+			throw new ExecuteSourceMethodException(e);
+		}
+		sourceData = null == sourceData ? new Null() : sourceData;
+		return sourceData;
 	}
 
 	@Override
@@ -134,11 +167,20 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 
 	@Override
 	public Object doProcessAndCache(int time) throws ConsistentTimeException, ExecuteSourceMethodException {
-		Object source = doProcess();
-		Boolean isQuery = cacheContext.isQuery();
-		if(null != isQuery && isQuery)
-			putCache(source, time);
-		return source;
+		String intern = cacheContext.getDynamicUniqueMark().intern();
+		synchronized (intern) {
+			try {
+				return unwrap(getCacheWithWrap());
+			} catch (CacheOutOfDateException | CacheNotExistException e) {
+				Object source = doProcessWithWrap();
+				Boolean isQuery = cacheContext.isQuery();
+				if(null != isQuery && isQuery) {
+					//只有在查询方法时才把源数据放在缓存中
+					putCache(source, time);
+				}
+				return unwrap(source);
+			}
+		}
 	}
 	
 	@Override

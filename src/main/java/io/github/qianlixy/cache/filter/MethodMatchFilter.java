@@ -32,16 +32,18 @@ public class MethodMatchFilter extends ConfigurableFilter<MethodMatchFilterConfi
 			return filterChain.doFilter(cacheProcesser, filterChain);
 		}
 		Collection<MethodMatchFilterConfigBean> configBeans = filterConfig.getConfigBeans();
-		if(null == configBeans || configBeans.size() <= 0) 
+		if(null == configBeans || configBeans.size() <= 0) {
 			return filterChain.doFilter(cacheProcesser, filterChain);
+		}
 		
 		//匹配方法
 		for (MethodMatchFilterConfigBean config : configBeans) {
 			if(config.isFrom() ? matchFrom(config) : matchMethod(config, 
 					cacheProcesser.getTargetClass().getName(), cacheProcesser.getMethodName())) {
 				//修改拦截方法对应的缓存时间
-				if(config.getCacheTime() >= 0)
+				if(config.getCacheTime() >= 0) {
 					cacheProcesser.setCacheTime(config.getCacheTime());
+				}
 				//TODO 判断是否始终保持缓存不失效
 				//匹配成功
 				return filterChain.doFilter(cacheProcesser, filterChain);

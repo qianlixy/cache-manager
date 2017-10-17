@@ -42,7 +42,9 @@ public class DefaultCacheContext implements CacheContext {
 	@Override
 	public void setTables(Collection<String> tables) {
 		Map<String, Collection<String>> map = (Map<String, Collection<String>>) cacheAdapter.get(METHOD_TABLES_MAP);
-		if(null == map) map = new HashMap<>();
+		if(null == map) {
+			map = new HashMap<>();
+		}
 		map.put(get(STATIC_UNIQUE_MARK), tables);
 		cacheAdapter.set(METHOD_TABLES_MAP, map);
 	}
@@ -50,7 +52,9 @@ public class DefaultCacheContext implements CacheContext {
 	@Override
 	public void addTables(Collection<String> newTables) {
 		Collection<String> tables = getTables();
-		if(null == tables) tables = new HashSet<>();
+		if(null == tables) {
+			tables = new HashSet<>();
+		}
 		tables.addAll(newTables);
 		setTables(tables);
 	}
@@ -58,14 +62,18 @@ public class DefaultCacheContext implements CacheContext {
 	@Override
 	public Collection<String> getTables() {
 		Map<String, Collection<String>> map = (Map<String, Collection<String>>) cacheAdapter.get(METHOD_TABLES_MAP);
-		if(null == map) return null;
+		if(null == map) {
+			return null;
+		}
 		return map.get(get(STATIC_UNIQUE_MARK));
 	}
 
 	@Override
 	public Boolean isQuery() {
 		Object isQuery = get(threadLocal);
-		if(null != isQuery) return isQuery();
+		if(null != isQuery) {
+			return isQuery();
+		}
 		Map<String, Boolean> isQueryMap = (Map<String, Boolean>) cacheAdapter.get(IS_QUERY_METHOD);
 		return null == isQueryMap ? null : isQueryMap.get(get(DYNAMIC_UNIQUE_MARK));
 	}
@@ -84,7 +92,9 @@ public class DefaultCacheContext implements CacheContext {
 	@Override
 	public long getLastQueryTime() {
 		Map<String, Long> isQueryMap = (Map<String, Long>) cacheAdapter.get(LAST_QUERY_TIME);
-		if(null == isQueryMap) return 0L;
+		if(null == isQueryMap) {
+			return 0L;
+		}
 		Long time = isQueryMap.get(get(DYNAMIC_UNIQUE_MARK));
 		return null == time ? 0L : time;
 	}
@@ -92,7 +102,9 @@ public class DefaultCacheContext implements CacheContext {
 	@Override
 	public void setLastQueryTime(ConsistentTime lastQueryTime) throws ConsistentTimeException {
 		Map<String, Long> isQueryMap = (Map<String, Long>) cacheAdapter.get(LAST_QUERY_TIME);
-		if(null == isQueryMap) isQueryMap = new HashMap<>();
+		if(null == isQueryMap) {
+			isQueryMap = new HashMap<>();
+		}
 		isQueryMap.put(get(DYNAMIC_UNIQUE_MARK), lastQueryTime.getTime());
 		cacheAdapter.set(LAST_QUERY_TIME, isQueryMap);
 	}
@@ -108,7 +120,9 @@ public class DefaultCacheContext implements CacheContext {
 	@Override
 	public void setTableLastAlterTime(String table, ConsistentTime time) throws ConsistentTimeException {
 		Map<String, Long> isQueryMap = (Map<String, Long>) cacheAdapter.get(LAST_ALTER_TIME);
-		if(null == isQueryMap) isQueryMap = new HashMap<>();
+		if(null == isQueryMap) {
+			isQueryMap = new HashMap<>();
+		}
 		isQueryMap.put(table, time.getTime());
 		cacheAdapter.set(LAST_ALTER_TIME, isQueryMap);
 	}
@@ -116,7 +130,9 @@ public class DefaultCacheContext implements CacheContext {
 	@Override
 	public long getTableLastAlterTime(String table) {
 		Map<String, Long> isQueryMap = (Map<String, Long>) cacheAdapter.get(LAST_ALTER_TIME);
-		if(null == isQueryMap) return 0L;
+		if(null == isQueryMap) {
+			return 0L;
+		}
 		Long time = isQueryMap.get(table);
 		return null == time ? 0L : time;
 	}

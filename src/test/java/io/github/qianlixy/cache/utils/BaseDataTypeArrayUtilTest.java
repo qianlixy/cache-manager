@@ -17,7 +17,7 @@ public class BaseDataTypeArrayUtilTest {
 		Object doubleArray = new double[]{1.0, 2.0, 3.0};
 		Object booleanArray = new boolean[]{true, false, true};
 		Object charArray = new char[]{'a', 'b', 'a'};
-		Object StringArray = new String[]{"a", "b", "c"};
+		Object stringArray = new String[]{"a", "b", "c"};
 		
 		assertEquals(2, BaseDataTypeArrayUtil.arrayValue(intArray, 1));
 		assertEquals(new Byte("2").byteValue(), BaseDataTypeArrayUtil.arrayValue(byteArray, 1));
@@ -27,7 +27,7 @@ public class BaseDataTypeArrayUtilTest {
 		assertEquals(2.0, BaseDataTypeArrayUtil.arrayValue(doubleArray, 1));
 		assertEquals(false, BaseDataTypeArrayUtil.arrayValue(booleanArray, 1));
 		assertEquals('b', BaseDataTypeArrayUtil.arrayValue(charArray, 1));
-		assertEquals("b", BaseDataTypeArrayUtil.arrayValue(StringArray, 1));
+		assertEquals("b", BaseDataTypeArrayUtil.arrayValue(stringArray, 1));
 		
 		int length = BaseDataTypeArrayUtil.arrayLength(intArray);
 		for(int i=0; i<length; i++) {

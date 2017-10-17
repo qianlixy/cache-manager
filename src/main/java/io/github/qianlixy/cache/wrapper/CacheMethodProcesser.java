@@ -31,8 +31,8 @@ public interface CacheMethodProcesser {
 	/**
 	 * 获取源方法的缓存
 	 * @return 源方法的缓存（如果存在并且未失效）
-	 * @throws CacheOutOfDateException 缓存超时失效异常
-	 * @throws CacheNotExistException 缓存不存在异常
+	 * @throws CacheOutOfDateException 缓存超时失效抛出该异常
+	 * @throws CacheNotExistException 缓存不存在时将抛出该异常
 	 */
 	Object getCache() throws CacheOutOfDateException, CacheNotExistException;
 	
@@ -80,9 +80,9 @@ public interface CacheMethodProcesser {
 	String getFullMethodName();
 
 	/**
-	 * <p>执行源方法，一个线程只执行源方法一次，防止对数据库造成额外压力</p>
+	 * <p>执行源方法</p>
 	 * @return 返回源方法执行后的返回值（如果源方法没有返回值或者源方法返回值为null将返回null）
-	 * @throws 会抛出源方法执行期间可能会出现的异常
+	 * @throws ExecuteSourceMethodException 会抛出源方法执行期间可能会出现的异常
 	 */
 	Object doProcess() throws ExecuteSourceMethodException;
 	
