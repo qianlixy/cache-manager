@@ -182,11 +182,11 @@ public class DefaultCacheManger implements CacheManager {
 		}
 		//管理缓存
 		CacheMethodProcesser cacheProcesser = null;
+		Object source = null;
 		try {
 			//注册拦截源方法
 			cacheContext.register(joinPoint, cacheKeyProvider);
 			Boolean isQuery = cacheContext.isQuery();
-			Object source = null;
 			if (null == isQuery) {
 				//未知拦截方法是查询或修改方法，直接执行源方法
 				source = joinPoint.proceed();
@@ -215,8 +215,8 @@ public class DefaultCacheManger implements CacheManager {
 		} catch(ExecuteSourceMethodException e) {
 			throw e;
 		} catch(Throwable th) {
-			LOGGER.error("Occur exception while dealing cache.", th);
-			return null == cacheProcesser ? joinPoint.proceed() : cacheProcesser.doProcessAndCache();
+			LOGGER.error(th.getClass() + " " + th.getMessage());
+			return null == cacheProcesser ? source : cacheProcesser.doProcessAndCache();
 		}
 	}
 	
