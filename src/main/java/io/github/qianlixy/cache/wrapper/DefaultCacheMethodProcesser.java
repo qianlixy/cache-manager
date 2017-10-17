@@ -69,7 +69,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 			return cachedData;
 		}
 		if(isOutOfDate) {
-			return null;
+			throw new CacheOutOfDateException();
 		}
 		//获取缓存
 		Object cache = cacheAdapter.get(cacheContext.getDynamicUniqueMark());
