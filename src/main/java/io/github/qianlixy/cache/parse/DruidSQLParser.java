@@ -52,6 +52,7 @@ public class DruidSQLParser extends FilterEventAdapter implements SQLParser {
 		try {
 			String dbType = getDbType(statement);
 			boolean isAlter = false;
+			LOGGER.debug("Intercepted SQL on [{}]", context.toString());
 			LOGGER.debug("Intercepted SQL : [{}]", sql);
 			List<SQLStatement> stmtList = SQLUtils.parseStatements(sql, dbType.toLowerCase());
 			List<String> tables = new ArrayList<>();

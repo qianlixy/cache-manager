@@ -191,6 +191,10 @@ public class DefaultCacheManger implements CacheManager {
 				//未知拦截方法是查询或修改方法，直接执行源方法
 				source = joinPoint.proceed();
 				isQuery = cacheContext.isQuery();
+				if(null == isQuery) {
+					//拦截不到SQL，直接返回source
+					return source;
+				}
 			}
 			//非查询方法不执行拦截器
 			if(!isQuery) {
@@ -215,7 +219,7 @@ public class DefaultCacheManger implements CacheManager {
 		} catch(ExecuteSourceMethodException e) {
 			throw e;
 		} catch(Throwable th) {
-			LOGGER.error(th.getClass() + " " + th.getMessage());
+			LOGGER.error("Occur exception while caching", th);
 			return null == cacheProcesser ? source : cacheProcesser.doProcessAndCache();
 		}
 	}
