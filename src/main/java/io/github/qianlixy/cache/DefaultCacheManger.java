@@ -56,11 +56,13 @@ public class DefaultCacheManger implements CacheManager {
 
 	@Override
 	public void init() throws Exception {
+		LOGGER.info("Cache manager starts to initialize");
 		//初始化缓存客户端工厂对象
 		initCahceClientFactory();
 		
 		//初始化缓存方法上下文信息
 		cacheContext = new BeanCacheContext(cacheConfig.getCacheClientFactory().buildCacheAdapter());
+		LOGGER.info("Cache manager initialize CacheContext instance by [{}]", BeanCacheContext.class.getName());
 		
 		//初始化SQLParser
 		initSQLParser();
@@ -95,6 +97,7 @@ public class DefaultCacheManger implements CacheManager {
 			cacheConfig.getFilterConfigs().forEach((config) -> configClass.add(config.getClass()));
 		}
 		for (Filter filter : filters) {
+			LOGGER.info("Cache manager initialize filter list add instance [{}]", filter.getClass().getName());
 			if (filter instanceof ConfigurableFilter<?>) {
 				Class<FilterConfig> genericClass = 
 						(Class<FilterConfig>) ((ParameterizedType) filter.getClass().getGenericSuperclass())
@@ -137,6 +140,7 @@ public class DefaultCacheManger implements CacheManager {
 			}
 			cacheConfig.setCacheClientFactory(factory);
 		}
+		LOGGER.info("Cache manager initialize CahceClientFactory instance by [{}]", cacheConfig.getCacheClientFactory().getClass().getName());
 	}
 
 	/**
@@ -153,6 +157,7 @@ public class DefaultCacheManger implements CacheManager {
 			cacheConfig.setSQLParser(SQLParser);
 		}
 		cacheConfig.getSQLParser().setCacheContext(cacheContext);
+		LOGGER.info("Cache manager initialize SQLParser instance by [{}]", cacheConfig.getSQLParser().getClass().getName());
 	}
 
 	/**

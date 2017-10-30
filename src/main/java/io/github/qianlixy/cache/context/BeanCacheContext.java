@@ -82,7 +82,7 @@ public class BeanCacheContext extends DefaultCacheContext {
 			contextBean = (MethodContextBean) cacheAdapter.get(getKeyWithNamespace());
 			if(null == contextBean) {
 				if(isNew) {
-					contextBean = new MethodContextBean(get(STATIC_METHOD_FULL_NAME));
+					contextBean = new MethodContextBean(get(DYNAMIC_UNIQUE_MARK));
 				} else {
 					return null;
 				}
@@ -104,7 +104,7 @@ public class BeanCacheContext extends DefaultCacheContext {
 	}
 	
 	private String getKeyWithNamespace() {
-		return keyProvider.process(NAMESPACE + get(STATIC_METHOD_FULL_NAME));
+		return keyProvider.process(NAMESPACE + get(DYNAMIC_UNIQUE_MARK));
 	}
 
 }
