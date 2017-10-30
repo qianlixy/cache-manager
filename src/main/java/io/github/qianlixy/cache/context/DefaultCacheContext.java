@@ -112,6 +112,7 @@ public class DefaultCacheContext implements CacheContext {
 
 	@Override
 	public void register(ProceedingJoinPoint joinPoint, CacheKeyProvider keyProvider) {
+		//清空当前线程保存变量，防止同一线程间变量污染
 		threadLocal.remove();
 		String methodName = joinPoint.getSignature().toLongString();
 		set(STATIC_METHOD_FULL_NAME, methodName);
