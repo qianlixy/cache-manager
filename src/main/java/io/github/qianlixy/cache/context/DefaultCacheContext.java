@@ -1,9 +1,9 @@
 package io.github.qianlixy.cache.context;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 
@@ -14,14 +14,14 @@ import io.github.qianlixy.cache.utils.UniqueMethodMarkUtil;
 @SuppressWarnings("unchecked")
 public class DefaultCacheContext implements CacheContext {
 	
-	private static ThreadLocal<Map<Object, Object>> threadLocal = new ThreadLocal<>();
+	protected static ThreadLocal<Map<Object, Object>> threadLocal = new ThreadLocal<>();
 	
 	/** 源方法的静态唯一标示key */
-	private String STATIC_UNIQUE_MARK = "STATIC_UNIQUE_MARK";
+	protected String STATIC_UNIQUE_MARK = "STATIC_UNIQUE_MARK";
 	/** 源方法的全路径名称key */
-	private String STATIC_METHOD_FULL_NAME = "STATIC_METHOD_FULL_NAME";
+	protected String STATIC_METHOD_FULL_NAME = "STATIC_METHOD_FULL_NAME";
 	/** 源方法的动态唯一标示key */
-	private String DYNAMIC_UNIQUE_MARK = "DYNAMIC_UNIQUE_MARK";
+	protected String DYNAMIC_UNIQUE_MARK = "DYNAMIC_UNIQUE_MARK";
 	/** 是否源方法是查询方法key */
 	private String IS_QUERY_METHOD = "IS_QUERY_METHOD";
 	/** 源方法的最后查询时间的映射key */
@@ -33,15 +33,16 @@ public class DefaultCacheContext implements CacheContext {
 	/** 保存在当前线程中方法类型的key */
 	private String THREAD_LOCAL_IS_QUERY_METHOD = "THREAD_LOCAL_IS_QUERY_METHOD";
 	
-	private CacheAdapter cacheAdapter;
+	protected CacheAdapter cacheAdapter;
+	protected CacheKeyProvider keyProvider;
 
 	public DefaultCacheContext(CacheAdapter cacheAdapter) {
 		this.cacheAdapter = cacheAdapter;
 	}
 
 	@Override
-	public void setTables(Collection<String> tables) {
-		Map<String, Collection<String>> map = (Map<String, Collection<String>>) cacheAdapter.get(METHOD_TABLES_MAP);
+	public void setTables(Set<String> tables) {
+		Map<String, Set<String>> map = (Map<String, Set<String>>) cacheAdapter.get(METHOD_TABLES_MAP);
 		if(null == map) {
 			map = new HashMap<>();
 		}
@@ -50,8 +51,8 @@ public class DefaultCacheContext implements CacheContext {
 	}
 	
 	@Override
-	public void addTables(Collection<String> newTables) {
-		Collection<String> tables = getTables();
+	public void addTables(Set<String> newTables) {
+		Set<String> tables = getTables();
 		if(null == tables) {
 			tables = new HashSet<>();
 		}
@@ -60,8 +61,8 @@ public class DefaultCacheContext implements CacheContext {
 	}
 
 	@Override
-	public Collection<String> getTables() {
-		Map<String, Collection<String>> map = (Map<String, Collection<String>>) cacheAdapter.get(METHOD_TABLES_MAP);
+	public Set<String> getTables() {
+		Map<String, Set<String>> map = (Map<String, Set<String>>) cacheAdapter.get(METHOD_TABLES_MAP);
 		if(null == map) {
 			return null;
 		}
@@ -110,11 +111,13 @@ public class DefaultCacheContext implements CacheContext {
 	}
 
 	@Override
-	public void register(ProceedingJoinPoint joinPoint, CacheKeyProvider generator) {
+	public void register(ProceedingJoinPoint joinPoint, CacheKeyProvider keyProvider) {
+		threadLocal.remove();
 		String methodName = joinPoint.getSignature().toLongString();
 		set(STATIC_METHOD_FULL_NAME, methodName);
-		set(STATIC_UNIQUE_MARK, generator.process(methodName));
-		set(DYNAMIC_UNIQUE_MARK, generator.process(UniqueMethodMarkUtil.uniqueMark(joinPoint)));
+		set(STATIC_UNIQUE_MARK, keyProvider.process(methodName));
+		set(DYNAMIC_UNIQUE_MARK, keyProvider.process(UniqueMethodMarkUtil.uniqueMark(joinPoint)));
+		this.keyProvider = keyProvider;
 	}
 
 	@Override
@@ -137,15 +140,15 @@ public class DefaultCacheContext implements CacheContext {
 		return null == time ? 0L : time;
 	}
 
-	public void set(Object key, Object value) {
+	protected void set(Object key, Object value) {
 		get().put(key, value);
 	}
 
-	public <T> T get(Object key) {
+	protected <T> T get(Object key) {
 		return (T) get().get(key);
 	}
 
-	public void remove(Object key) {
+	protected void remove(Object key) {
 		get().remove(key);
 	}
 

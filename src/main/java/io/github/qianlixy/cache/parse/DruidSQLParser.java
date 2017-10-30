@@ -3,8 +3,10 @@ package io.github.qianlixy.cache.parse;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -50,12 +52,15 @@ public class DruidSQLParser extends FilterEventAdapter implements SQLParser {
 
 	private void handleSql(StatementProxy statement, String sql) {
 		try {
+			//上下文环境为null是不解析SQL
+			if(null == context || null == context.toString()) {
+				return;
+			}
 			String dbType = getDbType(statement);
 			boolean isAlter = false;
-			LOGGER.debug("Intercepted SQL on [{}]", context.toString());
 			LOGGER.debug("Intercepted SQL : [{}]", sql);
 			List<SQLStatement> stmtList = SQLUtils.parseStatements(sql, dbType.toLowerCase());
-			List<String> tables = new ArrayList<>();
+			Set<String> tables = new HashSet<>();
 			for (SQLStatement sqlStatement : stmtList) {
 				MySqlSchemaStatVisitor visitor = new MySqlSchemaStatVisitor();
 				sqlStatement.accept(visitor);
@@ -78,7 +83,7 @@ public class DruidSQLParser extends FilterEventAdapter implements SQLParser {
 			context.addTables(tables);
 			context.setQuery(!isAlter);
 		} catch (Throwable th) {
-			LOGGER.error("Occur exception while parse SQL. exception message : {}", th.getMessage());
+			LOGGER.error("Occur exception while parse SQL", th);
 		}
 	}
 	

@@ -58,7 +58,7 @@
 			<list>
 				<bean class="java.net.InetSocketAddress">
 					<constructor-arg>
-						<value>192.168.206.100</value>
+						<value>localhost</value>
 					</constructor-arg>
 					<constructor-arg>
 						<value>11211</value>
@@ -70,6 +70,44 @@
 	
 	<bean name="memcachedClient" factory-bean="memcachedClientBuilder"
 		factory-method="build" destroy-method="shutdown" />
+
+	<bean id="jedisCluster" class="redis.clients.jedis.JedisCluster">
+		<constructor-arg>
+			<set>
+				<bean class="redis.clients.jedis.HostAndPort">
+					<constructor-arg><value>192.168.0.219</value></constructor-arg>
+					<constructor-arg><value>6379</value></constructor-arg>
+				</bean>
+				<bean class="redis.clients.jedis.HostAndPort">
+					<constructor-arg><value>192.168.0.219</value></constructor-arg>
+					<constructor-arg><value>6380</value></constructor-arg>
+				</bean>
+				<bean class="redis.clients.jedis.HostAndPort">
+					<constructor-arg><value>192.168.0.219</value></constructor-arg>
+					<constructor-arg><value>6381</value></constructor-arg>
+				</bean>
+				<bean class="redis.clients.jedis.HostAndPort">
+					<constructor-arg><value>192.168.0.220</value></constructor-arg>
+					<constructor-arg><value>6379</value></constructor-arg>
+				</bean>
+				<bean class="redis.clients.jedis.HostAndPort">
+					<constructor-arg><value>192.168.0.220</value></constructor-arg>
+					<constructor-arg><value>6380</value></constructor-arg>
+				</bean>
+				<bean class="redis.clients.jedis.HostAndPort">
+					<constructor-arg><value>192.168.0.220</value></constructor-arg>
+					<constructor-arg><value>6381</value></constructor-arg>
+				</bean>
+			</set>
+		</constructor-arg>
+		<constructor-arg>
+			<bean class="redis.clients.jedis.JedisPoolConfig">
+				<property name="maxTotal" value="4096"></property>
+				<property name="maxIdle" value="96"></property>
+				<property name="maxWaitMillis" value="1000"></property>
+			</bean>
+		</constructor-arg>
+	</bean>
 
 	<import resource="applicationCache.xml"/>
 

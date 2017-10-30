@@ -11,5 +11,9 @@ public class ConsistentTimeException extends Exception {
 	public ConsistentTimeException(Throwable cause) {
 		super(cause);
 	}
+
+	public ConsistentTimeException(String message) {
+		super(message);
+	}
 	
 }

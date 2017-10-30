@@ -2,6 +2,7 @@ package io.github.qianlixy.cache.wrapper;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,7 +51,9 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	
 	@Override
 	public void putCache(Object source, int time) throws ConsistentTimeException {
-		cacheAdapter.set(cacheContext.getDynamicUniqueMark(), wrap(source), time);
+		String dynamicUniqueMark = cacheContext.getDynamicUniqueMark();
+		LOGGER.debug("Put cache that time is {} on [{}]", time, dynamicUniqueMark);
+		cacheAdapter.set(dynamicUniqueMark, wrap(source), time);
 		cacheContext.setLastQueryTime(ApplicationContext.getConsistentTimeProvider().newInstance());
 	}
 	
@@ -66,6 +69,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	private Object getCacheWithWrap() {
 		//备份结果，一个线程中只执行缓存客户端查询
 		if(null != cachedData) {
+			LOGGER.debug("Cached data is out of date on [{}]", cacheContext.toString());
 			return cachedData;
 		}
 		if(isOutOfDate) {
@@ -152,7 +156,10 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 			return sourceData;
 		}
 		try {
+			LOGGER.debug("Start execute source method [{}]", cacheContext.toString());
+			Date start = new Date();
 			sourceData = joinPoint.proceed();
+			LOGGER.debug("Execute source method execute time {}ms", new Date().getTime() - start.getTime());
 		} catch (Throwable e) {
 			throw new ExecuteSourceMethodException(e);
 		}

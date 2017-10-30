@@ -5,16 +5,17 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 
 import io.github.qianlixy.cache.context.ApplicationContext;
+import io.github.qianlixy.cache.context.BeanCacheContext;
 import io.github.qianlixy.cache.context.CacheContext;
 import io.github.qianlixy.cache.context.CacheKeyProvider;
 import io.github.qianlixy.cache.context.ConsistentTime;
 import io.github.qianlixy.cache.context.ConsistentTimeProvider;
-import io.github.qianlixy.cache.context.DefaultCacheContext;
 import io.github.qianlixy.cache.context.MD5CacheKeyProvider;
 import io.github.qianlixy.cache.exception.CacheNotExistException;
 import io.github.qianlixy.cache.exception.CacheOutOfDateException;
@@ -59,7 +60,7 @@ public class DefaultCacheManger implements CacheManager {
 		initCahceClientFactory();
 		
 		//初始化缓存方法上下文信息
-		cacheContext = new DefaultCacheContext(cacheConfig.getCacheClientFactory().buildCacheAdapter());
+		cacheContext = new BeanCacheContext(cacheConfig.getCacheClientFactory().buildCacheAdapter());
 		
 		//初始化SQLParser
 		initSQLParser();
@@ -176,20 +177,20 @@ public class DefaultCacheManger implements CacheManager {
 
 	@Override
 	public Object doCache(ProceedingJoinPoint joinPoint) throws Throwable {
+		Date start = new Date();
 		//配置参数是否管理缓存为false，直接执行源代码并返回
 		if(!cacheConfig.isManageCache()) {
 			return joinPoint.proceed();
 		}
-		//管理缓存
-		CacheMethodProcesser cacheProcesser = null;
-		Object source = null;
+		//注册拦截源方法
+		cacheContext.register(joinPoint, cacheKeyProvider);
+		//生成源方法缓存操作包装类对象
+		CacheMethodProcesser cacheProcesser = new DefaultCacheMethodProcesser(joinPoint, cacheContext);
 		try {
-			//注册拦截源方法
-			cacheContext.register(joinPoint, cacheKeyProvider);
 			Boolean isQuery = cacheContext.isQuery();
 			if (null == isQuery) {
 				//未知拦截方法是查询或修改方法，直接执行源方法
-				source = joinPoint.proceed();
+				Object source = cacheProcesser.doProcess();
 				isQuery = cacheContext.isQuery();
 				if(null == isQuery) {
 					//拦截不到SQL，直接返回source
@@ -198,11 +199,8 @@ public class DefaultCacheManger implements CacheManager {
 			}
 			//非查询方法不执行拦截器
 			if(!isQuery) {
-				return source;
+				return cacheProcesser.doProcess();
 			}
-			
-			//生成源方法缓存操作包装类对象
-			cacheProcesser = new DefaultCacheMethodProcesser(joinPoint, cacheContext);
 			
 			//拦截方法为查询方法时，依次调用过滤器
 			FilterChain filterChain = new FilterChain();
@@ -220,7 +218,11 @@ public class DefaultCacheManger implements CacheManager {
 			throw e;
 		} catch(Throwable th) {
 			LOGGER.error("Occur exception while caching", th);
-			return null == cacheProcesser ? source : cacheProcesser.doProcessAndCache();
+			return cacheProcesser.doProcess();
+		} finally {
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Cache manager execute time {}ms", new Date().getTime() - start.getTime());
+			}
 		}
 	}
 	
