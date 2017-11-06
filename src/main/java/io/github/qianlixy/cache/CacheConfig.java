@@ -16,7 +16,6 @@ import io.github.qianlixy.cache.parse.SQLParser;
  * 
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月9日 下午9:08:50
  */
 public class CacheConfig {
 	

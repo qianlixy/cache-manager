@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import io.github.qianlixy.cache.CacheConfig;
 import io.github.qianlixy.cache.CacheManager;
+import io.github.qianlixy.cache.context.CacheContext;
 import io.github.qianlixy.cache.exception.CacheNotExistException;
 import io.github.qianlixy.cache.exception.CacheOutOfDateException;
 import io.github.qianlixy.cache.exception.ConsistentTimeException;
@@ -90,7 +91,8 @@ public interface CacheMethodProcesser {
 	 * <p>执行源方法，如果源方法为查询方法，则将查询结果缓存。</p>
 	 * <p>缓存时间为全局默认时间{@link CacheConfig#defaultCacheTime}</p>
 	 * @return 源方法执行结果（如果存在返回值，不存在则为null）
-	 * @throws Throwable 执行源方法遇到的异常
+	 * @throws ConsistentTimeException 设置缓存时需要获取一致性时间，不能获取一致性时间时将抛出该异常
+	 * @throws ExecuteSourceMethodException 源方法执行异常
 	 * @see #doProcessAndCache(int)
 	 */
 	Object doProcessAndCache() throws ConsistentTimeException, ExecuteSourceMethodException;
@@ -99,7 +101,8 @@ public interface CacheMethodProcesser {
 	 * <p>执行源方法，如果源方法为查询方法，则将查询结果缓存。</p>
 	 * @param time 缓存有效时间，单位：分钟
 	 * @return 源方法执行结果（如果存在返回值，不存在则为null）
-	 * @throws Throwable 执行源方法遇到的异常
+	 * @throws ConsistentTimeException 设置缓存时需要获取一致性时间，不能获取一致性时间时将抛出该异常
+	 * @throws ExecuteSourceMethodException 源方法执行异常
 	 * @see #doProcessAndCache()
 	 */
 	Object doProcessAndCache(int time) throws ConsistentTimeException, ExecuteSourceMethodException;
@@ -115,5 +118,11 @@ public interface CacheMethodProcesser {
 	 * @param cacheTime 缓存有效期，单位：分钟
 	 */
 	void setCacheTime(int cacheTime);
+	
+	/**
+	 * 获取缓存上下文信息
+	 * @return {@link CacheContext}
+	 */
+	CacheContext getCacheContext();
 	
 }

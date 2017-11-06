@@ -4,12 +4,12 @@ import java.io.IOException;
 
 import io.github.qianlixy.cache.CacheAdapter;
 import net.rubyeye.xmemcached.MemcachedClient;
+import redis.clients.jedis.JedisCluster;
 
 /**
  * 缓存适配器抽象工厂
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月9日 下午9:30:17
  * @param <T> 缓存客户端
  */
 public abstract class AbstractCacheAdapterFactory<T> {
@@ -23,7 +23,7 @@ public abstract class AbstractCacheAdapterFactory<T> {
 	/**
 	 * 构建缓存适配器
 	 * @return 缓存适配器
-	 * @throws IOException
+	 * @throws IOException 构建缓存适配器时可能会发生该异常
 	 */
 	public abstract CacheAdapter buildCacheAdapter() throws IOException;
 	
@@ -37,6 +37,8 @@ public abstract class AbstractCacheAdapterFactory<T> {
 			MemcachedCacheAdapterFactory factory = new MemcachedCacheAdapterFactory();
 			factory.setClient((MemcachedClient) cacheClient);
 			return factory;
+		} else if(cacheClient instanceof JedisCluster) {
+			return new RedisAdapterFactory((JedisCluster) cacheClient);
 		}
 		return null;
 	}

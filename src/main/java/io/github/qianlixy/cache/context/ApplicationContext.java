@@ -9,7 +9,6 @@ import io.github.qianlixy.cache.impl.AbstractCacheAdapterFactory;
  * 应用上下文信息
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月14日 上午10:10:50
  */
 public class ApplicationContext {
 	
@@ -34,7 +33,7 @@ public class ApplicationContext {
 	
 	/**
 	 * 获取缓存适配器工厂对象
-	 * @return
+	 * @return 缓存适配器工厂，用于构造缓存适配器
 	 */
 	public static AbstractCacheAdapterFactory<?> getCacheAdaperFactory() {
 		return (AbstractCacheAdapterFactory<?>) context.get(KEY_CACHE_ADAPTER_FACTORY);
@@ -42,7 +41,7 @@ public class ApplicationContext {
 	
 	/**
 	 * 获取一致性时间提供者
-	 * @return
+	 * @return 一致性时间提供者，用于获取一致性时间
 	 */
 	public static ConsistentTimeProvider getConsistentTimeProvider() {
 		return (ConsistentTimeProvider) context.get(KEY_CONSISTENT_TIME_PROVIDER);
@@ -50,7 +49,7 @@ public class ApplicationContext {
 	
 	/**
 	 * 全局缓存有效期
-	 * @return
+	 * @return 全局缓存有效期。单位：分钟
 	 */
 	public static int getDefaultCacheTime() {
 		return (int) context.get(KEY_DEFAULT_CACHE_TIME);

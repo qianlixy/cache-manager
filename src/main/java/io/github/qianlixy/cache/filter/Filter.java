@@ -9,7 +9,6 @@ import io.github.qianlixy.cache.wrapper.CacheMethodProcesser;
  * 过滤器接口
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月14日 下午10:58:57
  */
 public interface Filter {
 	

@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
  * 拦截方法的匹配规则
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月14日 下午10:12:45
  */
 public class MethodMatchFilterConfigBean {
 
@@ -16,7 +15,7 @@ public class MethodMatchFilterConfigBean {
 	private boolean from = false;
 	//匹配通过的方法的缓存有效期。默认是全局默认缓存有效期
 	private int cacheTime = -1;
-	//是否保持缓存有效。
+	//是否保持缓存有效，未实现
 	private boolean keep = false;
 
 	public MethodMatchFilterConfigBean() {}

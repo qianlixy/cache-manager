@@ -7,7 +7,6 @@ import java.util.Collection;
  * <p>通过给定的正则表达式匹配拦截方法路径，匹配通过进行缓存处理，否则执行源方法并返回 </p>
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月14日 下午10:09:17
  */
 public class MethodMatchFilterConfig implements FilterConfig {
 

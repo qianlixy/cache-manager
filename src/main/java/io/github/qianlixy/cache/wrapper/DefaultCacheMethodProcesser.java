@@ -20,7 +20,6 @@ import io.github.qianlixy.cache.exception.ExecuteSourceMethodException;
  * 默认的缓存方法包装类
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月14日 下午10:34:59
  */
 public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	
@@ -216,6 +215,11 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	 */
 	private Object unwrap(Object obj) {
 		return obj instanceof Null ? null : obj;
+	}
+
+	@Override
+	public CacheContext getCacheContext() {
+		return this.cacheContext;
 	}
 	
 }

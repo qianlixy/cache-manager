@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.github.qianlixy.cache.CacheAdapter;
-import io.github.qianlixy.cache.exception.ConsistentTimeException;
 
 /**
  * 缓存信息上下文，每个方法的上下文信息封装成一个bean进行操作
@@ -65,7 +64,7 @@ public class BeanCacheContext extends DefaultCacheContext {
 	}
 
 	@Override
-	public void setLastQueryTime(ConsistentTime lastQueryTime) throws ConsistentTimeException {
+	public void setLastQueryTime(ConsistentTime lastQueryTime) {
 		MethodContextBean contextBean = getMethodContextBean(true);
 		contextBean.setLastQueryTime(lastQueryTime.getTime());
 		setMethodContextBean(contextBean);

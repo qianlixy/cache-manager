@@ -8,7 +8,6 @@ import java.util.Set;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 import io.github.qianlixy.cache.CacheAdapter;
-import io.github.qianlixy.cache.exception.ConsistentTimeException;
 import io.github.qianlixy.cache.utils.UniqueMethodMarkUtil;
 
 @SuppressWarnings("unchecked")
@@ -101,7 +100,7 @@ public class DefaultCacheContext implements CacheContext {
 	}
 
 	@Override
-	public void setLastQueryTime(ConsistentTime lastQueryTime) throws ConsistentTimeException {
+	public void setLastQueryTime(ConsistentTime lastQueryTime) {
 		Map<String, Long> isQueryMap = (Map<String, Long>) cacheAdapter.get(LAST_QUERY_TIME);
 		if(null == isQueryMap) {
 			isQueryMap = new HashMap<>();
@@ -112,7 +111,6 @@ public class DefaultCacheContext implements CacheContext {
 
 	@Override
 	public void register(ProceedingJoinPoint joinPoint, CacheKeyProvider keyProvider) {
-		//清空当前线程保存变量，防止同一线程间变量污染
 		threadLocal.remove();
 		String methodName = joinPoint.getSignature().toLongString();
 		set(STATIC_METHOD_FULL_NAME, methodName);
@@ -122,7 +120,7 @@ public class DefaultCacheContext implements CacheContext {
 	}
 
 	@Override
-	public void setTableLastAlterTime(String table, ConsistentTime time) throws ConsistentTimeException {
+	public void setTableLastAlterTime(String table, ConsistentTime time) {
 		Map<String, Long> isQueryMap = (Map<String, Long>) cacheAdapter.get(LAST_ALTER_TIME);
 		if(null == isQueryMap) {
 			isQueryMap = new HashMap<>();

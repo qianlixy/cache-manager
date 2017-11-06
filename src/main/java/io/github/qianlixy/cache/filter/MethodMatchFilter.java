@@ -8,7 +8,6 @@ import io.github.qianlixy.cache.wrapper.CacheMethodProcesser;
  * 拦截到的源方法的过滤器，
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月14日 下午2:56:54
  */
 public class MethodMatchFilter extends ConfigurableFilter<MethodMatchFilterConfig> {
 	
@@ -56,7 +55,7 @@ public class MethodMatchFilter extends ConfigurableFilter<MethodMatchFilterConfi
 	/**
 	 * 匹配拦截方法
 	 * @param config 匹配参数
-	 * @param clazz 源方法class
+	 * @param className 源方法class
 	 * @param methodName 源方法名称
 	 * @return 是否匹配成功
 	 */

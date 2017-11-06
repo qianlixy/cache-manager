@@ -39,7 +39,6 @@ import io.github.qianlixy.cache.wrapper.DefaultCacheMethodProcesser;
  * 需要设置缓存配置{@link #cacheConfig}
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月9日 下午9:47:27
  */
 public class DefaultCacheManger implements CacheManager {
 	
@@ -56,7 +55,7 @@ public class DefaultCacheManger implements CacheManager {
 
 	@Override
 	public void init() throws Exception {
-		LOGGER.info("Cache manager starts to initialize");
+		LOGGER.info("Cache manager is initializing");
 		//初始化缓存客户端工厂对象
 		initCahceClientFactory();
 		
@@ -79,7 +78,8 @@ public class DefaultCacheManger implements CacheManager {
 
 	/**
 	 * 初始化过滤器
-	 * @throws InitCacheManagerException 
+	 * @throws InitCacheManagerException 过滤器类型为{@link ConfigurableFilter}并且泛型为{@link FilterRequiredConfig}或其子类时，
+	 * 			{@link #cacheConfig}配置参数<code>filterConfigs</code>则必须包含泛型类型的配置参数。否则将抛出初始化异常
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void initFilters() throws InitCacheManagerException {
@@ -88,8 +88,17 @@ public class DefaultCacheManger implements CacheManager {
 			filters = new ArrayList<>();
 			cacheConfig.setFilters(filters);
 		}
+		
 		//添加默认过滤器。方法拦截过滤器
 		filters.add(new MethodMatchFilter());
+		
+		//排序过滤器链
+		Collections.sort(filters, new Comparator<Filter>() {
+			@Override
+			public int compare(Filter o1, Filter o2) {
+				return o1.getOrder() - o2.getOrder();
+			}
+		});
 		
 		//判断filter类型。如果是ConfigurableFilter，初始化配置参数
 		List<Class<?>> configClass = new ArrayList<>();
@@ -114,13 +123,7 @@ public class DefaultCacheManger implements CacheManager {
 				}
 			}
 		}
-		//排序过滤器链
-		Collections.sort(filters, new Comparator<Filter>() {
-			@Override
-			public int compare(Filter o1, Filter o2) {
-				return o1.getOrder() - o2.getOrder();
-			}
-		});
+		
 		//绑定过滤器
 		FilterChain.setFilters(filters);
 	}
@@ -183,12 +186,12 @@ public class DefaultCacheManger implements CacheManager {
 	@Override
 	public Object doCache(ProceedingJoinPoint joinPoint) throws Throwable {
 		Date start = new Date();
+		//注册拦截源方法
+		cacheContext.register(joinPoint, cacheKeyProvider);
 		//配置参数是否管理缓存为false，直接执行源代码并返回
 		if(!cacheConfig.isManageCache()) {
 			return joinPoint.proceed();
 		}
-		//注册拦截源方法
-		cacheContext.register(joinPoint, cacheKeyProvider);
 		//生成源方法缓存操作包装类对象
 		CacheMethodProcesser cacheProcesser = new DefaultCacheMethodProcesser(joinPoint, cacheContext);
 		try {
@@ -228,6 +231,7 @@ public class DefaultCacheManger implements CacheManager {
 			if(LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Cache manager execute time {}ms", new Date().getTime() - start.getTime());
 			}
+			start = null;
 		}
 	}
 	

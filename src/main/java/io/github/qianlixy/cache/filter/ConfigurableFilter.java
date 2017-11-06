@@ -8,7 +8,6 @@ import io.github.qianlixy.cache.CacheConfig;
  * <p>泛型为{@link FilterRequiredConfig}时，{@link #setConfig(FilterConfig)}会调用，并且传入的对象不能为空</p>
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月14日 上午9:21:10
  */
 public abstract class ConfigurableFilter<FC extends FilterConfig> implements Filter {
 

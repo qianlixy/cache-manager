@@ -17,6 +17,7 @@ public interface CacheManager {
 	
 	/**
 	 * 缓存管理器的初始化
+	 * @throws Exception 初始化异常
 	 */
 	void init() throws Exception;
 

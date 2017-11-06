@@ -6,7 +6,6 @@ import java.lang.reflect.Array;
  * 基本数据类型数组操作的工具类
  * @author qianli_xy@163.com
  * @since 1.0.0
- * @date 2017年10月15日 下午11:22:00
  */
 public class BaseDataTypeArrayUtil {
 
