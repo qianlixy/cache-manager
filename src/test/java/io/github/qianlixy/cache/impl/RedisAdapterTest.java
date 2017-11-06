@@ -48,7 +48,7 @@ public class RedisAdapterTest {
 	@Test
 	public void testConsistentTime() throws ConsistentTimeException {
 		long old = 0L;
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10000; i++) {
 			long consistentTime = cacheAdapter.consistentTime();
 			Assert.assertTrue(consistentTime > old);
 			old = consistentTime;

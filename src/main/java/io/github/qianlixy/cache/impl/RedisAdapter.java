@@ -73,7 +73,6 @@ public class RedisAdapter implements CacheAdapter {
 
 	@Override
 	public long consistentTime() throws ConsistentTimeException {
-		//TODO 并行情况下，可能存在不唯一的时间
 		if(null == RedisAdapter.jedisNode) {
 			Collection<JedisPool> nodes = jedisCluster.getClusterNodes().values();
 			if(nodes.isEmpty()) {
@@ -83,7 +82,7 @@ public class RedisAdapter implements CacheAdapter {
 		}
 		try {
 			List<String> time = RedisAdapter.jedisNode.time();
-			return Long.valueOf(time.get(0) + time.get(1));
+			return Long.valueOf(time.get(0) + String.format("%06d", Integer.parseInt(time.get(1))));
 		} catch (Exception e) {
 			throw new ConsistentTimeException(e);
 		}
