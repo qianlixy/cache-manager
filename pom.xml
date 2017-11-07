@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.qianlixy</groupId>
 	<artifactId>cache-manager</artifactId>
-	<version>1.0.0-BETA</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>cache-manager</name>
 	<description>Cache manager is a smart cache-client manager</description>
 	
@@ -18,7 +18,7 @@
 		<connection>scm:git:git@github.com:qianlixy/cache-manager.git</connection>
 		<developerConnection>scm:git:git@github.com:qianlixy/cache-manager.git</developerConnection>
 		<url>scm:git:git@github.com:qianlixy/cache-manager.git</url>
-		<tag>1.0.0-BETA</tag>
+		<tag>cache-manager</tag>
 	</scm>
 	
 	<properties>
