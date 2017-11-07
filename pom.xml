@@ -4,7 +4,24 @@
 	<groupId>io.github.qianlixy</groupId>
 	<artifactId>cache-manager</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-
+	<name>cache-manager</name>
+	<description>Cache manager is a smart cache-client manager</description>
+	
+	<licenses>
+		<license>
+			<name>MIT</name>
+			<url>https://raw.githubusercontent.com/qianlixy/cache-manager/master/LICENSE</url>
+			<distribution>MIT License</distribution>
+		</license>
+	</licenses>
+	
+	<scm>
+		<connection>git@github.com:qianlixy/cache-manager.git</connection>
+		<developerConnection>git@github.com:qianlixy/cache-manager.git</developerConnection>
+		<url>git@github.com:qianlixy/cache-manager.git</url>
+		<tag>cache-manager</tag>
+	</scm>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -148,6 +165,12 @@
 
 	<build>
 		<plugins>
+			<!-- 版本发布插件 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
