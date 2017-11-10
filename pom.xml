@@ -1,11 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.qianlixy</groupId>
 	<artifactId>cache-manager</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
 	<name>cache-manager</name>
 	<description>Cache manager is a smart cache-client manager</description>
-	
+
 	<licenses>
 		<license>
 			<name>MIT</name>
@@ -13,14 +14,14 @@
 			<distribution>MIT License</distribution>
 		</license>
 	</licenses>
-	
+
 	<scm>
 		<connection>scm:git:git@github.com:qianlixy/cache-manager.git</connection>
 		<developerConnection>scm:git:git@github.com:qianlixy/cache-manager.git</developerConnection>
 		<url>scm:git:git@github.com:qianlixy/cache-manager.git</url>
 		<tag>cache-manager</tag>
 	</scm>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -110,6 +111,18 @@
 			<groupId>net.sourceforge.groboutils</groupId>
 			<artifactId>groboutils-core</artifactId>
 			<version>5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>1.7.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>1.7.3</version>
 			<scope>test</scope>
 		</dependency>
 

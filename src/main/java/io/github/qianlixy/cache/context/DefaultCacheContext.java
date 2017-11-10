@@ -111,8 +111,11 @@ public class DefaultCacheContext implements CacheContext {
 
 	@Override
 	public void register(ProceedingJoinPoint joinPoint, CacheKeyProvider keyProvider) {
-		threadLocal.remove();
 		String methodName = joinPoint.getSignature().toLongString();
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Register to cache context for method [{}]", methodName);
+		}
+		threadLocal.remove();
 		set(STATIC_METHOD_FULL_NAME, methodName);
 		set(STATIC_UNIQUE_MARK, keyProvider.process(methodName));
 		set(DYNAMIC_UNIQUE_MARK, keyProvider.process(UniqueMethodMarkUtil.uniqueMark(joinPoint)));

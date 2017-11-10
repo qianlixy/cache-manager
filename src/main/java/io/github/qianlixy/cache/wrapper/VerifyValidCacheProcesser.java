@@ -20,6 +20,7 @@ public class VerifyValidCacheProcesser extends BaseCacheProcesser implements Cac
 
 	@Override
 	public Object getCache() {
+		LOGGER.debug("Get cache from client for method [{}]", cacheContext.toString());
 		Object cache = cacheAdapter.get(cacheContext.getDynamicUniqueMark());
 		if(null == cache) {
 			return cache;

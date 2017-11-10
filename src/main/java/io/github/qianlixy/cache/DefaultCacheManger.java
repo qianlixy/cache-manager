@@ -17,8 +17,6 @@ import io.github.qianlixy.cache.context.CacheKeyProvider;
 import io.github.qianlixy.cache.context.ConsistentTime;
 import io.github.qianlixy.cache.context.ConsistentTimeProvider;
 import io.github.qianlixy.cache.context.MD5CacheKeyProvider;
-import io.github.qianlixy.cache.exception.CacheNotExistException;
-import io.github.qianlixy.cache.exception.CacheOutOfDateException;
 import io.github.qianlixy.cache.exception.ConsistentTimeException;
 import io.github.qianlixy.cache.exception.ExecuteSourceMethodException;
 import io.github.qianlixy.cache.exception.InitCacheManagerException;
@@ -32,7 +30,7 @@ import io.github.qianlixy.cache.filter.MethodMatchFilter;
 import io.github.qianlixy.cache.impl.AbstractCacheAdapterFactory;
 import io.github.qianlixy.cache.parse.DruidSQLParser;
 import io.github.qianlixy.cache.wrapper.CacheMethodProcesser;
-import io.github.qianlixy.cache.wrapper.DefaultCacheMethodProcesser;
+import io.github.qianlixy.cache.wrapper.WrapAndLocalCacheProcesser;
 
 /**
  * 默认的缓存管理器
@@ -193,7 +191,7 @@ public class DefaultCacheManger implements CacheManager {
 			return joinPoint.proceed();
 		}
 		//生成源方法缓存操作包装类对象
-		CacheMethodProcesser cacheProcesser = new DefaultCacheMethodProcesser(joinPoint, cacheContext);
+		CacheMethodProcesser cacheProcesser = new WrapAndLocalCacheProcesser(joinPoint, cacheContext);
 		try {
 			Boolean isQuery = cacheContext.isQuery();
 			if (null == isQuery) {
@@ -216,10 +214,13 @@ public class DefaultCacheManger implements CacheManager {
 				return filterChain.doFilter(cacheProcesser, filterChain);
 			} catch (NoFilterDealsException e) {
 				//没有缓存处理时，进行下面默认处理
-				try {
-					return cacheProcesser.getCache();
-				} catch (CacheOutOfDateException | CacheNotExistException e1) {
+				Object cache = cacheProcesser.getCache();
+				if(null == cache) {
+					LOGGER.debug("Use data from source method [{}]", cacheContext.getDynamicUniqueMark());
 					return cacheProcesser.doProcessAndCache();
+				} else {
+					LOGGER.debug("Use data from cache client for method [{}]", cacheContext.getDynamicUniqueMark());
+					return cache;
 				}
 			}
 		} catch(ExecuteSourceMethodException e) {
@@ -229,7 +230,7 @@ public class DefaultCacheManger implements CacheManager {
 			return cacheProcesser.doProcess();
 		} finally {
 			if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Cache manager execute time {}ms", new Date().getTime() - start.getTime());
+				LOGGER.debug("Cache manager executed time is {}ms", new Date().getTime() - start.getTime());
 			}
 			start = null;
 		}

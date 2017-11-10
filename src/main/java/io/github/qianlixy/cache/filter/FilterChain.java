@@ -28,7 +28,6 @@ public class FilterChain implements Filter {
 			throw new NoFilterDealsException();
 		}
 		Filter filter = FilterChain.filters.get(filterIndex);
-		LOGGER.debug("Current thread [{}]'s filter index is {}", Thread.currentThread().toString(), filterIndex);
 		filterIndex++;
 		//执行下一个过滤器
 		return filter.doFilter(cacheProcesser, filterChain);

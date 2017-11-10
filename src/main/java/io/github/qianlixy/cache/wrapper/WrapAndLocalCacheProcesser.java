@@ -10,8 +10,8 @@ import io.github.qianlixy.cache.exception.ExecuteSourceMethodException;
 
 public class WrapAndLocalCacheProcesser extends VerifyValidCacheProcesser {
 	
-	private Object sourceData;
-	private Object cachedData;
+	protected Object wrapSourceData;
+	protected Object wrapCachedData;
 
 	public WrapAndLocalCacheProcesser(ProceedingJoinPoint joinPoint, 
 			CacheContext cacheContext) throws IOException {
@@ -20,12 +20,15 @@ public class WrapAndLocalCacheProcesser extends VerifyValidCacheProcesser {
 	
 	@Override
 	public Object doProcess() throws ExecuteSourceMethodException {
-		if(null != sourceData) {
-			return unwrap(sourceData);
+		String intern = cacheContext.getDynamicUniqueMark().intern();
+		synchronized (intern) {
+			if(null != wrapSourceData) {
+				return unwrap(wrapSourceData);
+			}
+			Object source = super.doProcess();
+			wrapSourceData = wrap(source);
+			return source;
 		}
-		Object source = super.doProcess();
-		sourceData = wrap(source);
-		return source;
 	}
 
 	@Override
@@ -35,11 +38,11 @@ public class WrapAndLocalCacheProcesser extends VerifyValidCacheProcesser {
 
 	@Override
 	public Object getCache() {
-		if(null != cachedData) {
-			return unwrap(cachedData);
+		if(null != wrapCachedData) {
+			return unwrap(wrapCachedData);
 		}
 		Object cache = super.getCache();
-		cachedData = wrap(cache);
+		wrapCachedData = wrap(cache);
 		return cache;
 	}
 	

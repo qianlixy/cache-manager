@@ -27,7 +27,7 @@ public abstract class BaseCacheProcesser extends BaseMethodProcesser {
 	public Object doProcess() throws ExecuteSourceMethodException {
 		Date start = null;
 		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Start execute source method [{}]", cacheContext.toString());
+			LOGGER.debug("Start execute source method [{}]", cacheContext.getDynamicUniqueMark());
 			start = new Date();
 		}
 		try {
@@ -36,7 +36,9 @@ public abstract class BaseCacheProcesser extends BaseMethodProcesser {
 			throw new ExecuteSourceMethodException(e);
 		} finally {
 			if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Execute source method execute time {}ms", new Date().getTime() - start.getTime());
+				LOGGER.debug("Executed time is {}ms for source method [{}]", 
+						new Date().getTime() - start.getTime(),
+						cacheContext.getDynamicUniqueMark());
 				start = null;
 			}
 		}
