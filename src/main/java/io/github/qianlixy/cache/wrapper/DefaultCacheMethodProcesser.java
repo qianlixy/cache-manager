@@ -170,22 +170,25 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 	public Object doProcessAndCache() throws ConsistentTimeException, ExecuteSourceMethodException {
 		return doProcessAndCache(cacheTime);
 	}
+	
+	DistributedLock lock = new DistributedLock();
 
 	@Override
 	public Object doProcessAndCache(int time) throws ConsistentTimeException, ExecuteSourceMethodException {
 		String intern = cacheContext.getDynamicUniqueMark().intern();
-		synchronized (intern) {
-			try {
-				return unwrap(getCacheWithWrap());
-			} catch (CacheOutOfDateException | CacheNotExistException e) {
-				Object source = doProcessWithWrap();
-				Boolean isQuery = cacheContext.isQuery();
-				if(null != isQuery && isQuery) {
-					//只有在查询方法时才把源数据放在缓存中
-					putCache(source, time);
-				}
-				return unwrap(source);
+		lock.lock(intern);
+		try {
+			return unwrap(getCacheWithWrap());
+		} catch (CacheOutOfDateException | CacheNotExistException e) {
+			Object source = doProcessWithWrap();
+			Boolean isQuery = cacheContext.isQuery();
+			if(null != isQuery && isQuery) {
+				//只有在查询方法时才把源数据放在缓存中
+				putCache(source, time);
 			}
+			return unwrap(source);
+		} finally {
+			lock.unlock(intern);
 		}
 	}
 	

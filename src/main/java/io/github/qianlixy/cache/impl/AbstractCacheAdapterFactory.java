@@ -3,6 +3,7 @@ package io.github.qianlixy.cache.impl;
 import java.io.IOException;
 
 import io.github.qianlixy.cache.CacheAdapter;
+import io.github.qianlixy.cache.CasCacheAdapter;
 import net.rubyeye.xmemcached.MemcachedClient;
 import redis.clients.jedis.JedisCluster;
 
@@ -26,6 +27,10 @@ public abstract class AbstractCacheAdapterFactory<T> {
 	 * @throws IOException 构建缓存适配器时可能会发生该异常
 	 */
 	public abstract CacheAdapter buildCacheAdapter() throws IOException;
+	
+	public CasCacheAdapter buildCasCacheAdapter() throws IOException {
+		return null;
+	}
 	
 	/**
 	 * 使用缓存客户端构建缓存适配器工厂
