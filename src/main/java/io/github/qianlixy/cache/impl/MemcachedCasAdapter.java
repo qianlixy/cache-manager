@@ -12,6 +12,11 @@ public class MemcachedCasAdapter extends MemcachedAdapter implements CasCacheAda
 	
 	public MemcachedCasAdapter(MemcachedClient client) {
 		super(client);
+		try {
+			client.set(KEY_CAS, 0, 100);
+		} catch (TimeoutException | InterruptedException | MemcachedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

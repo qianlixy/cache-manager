@@ -3,10 +3,15 @@ package io.github.qianlixy.cache.wrapper;
 import java.io.IOException;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.qianlixy.cache.CasCacheAdapter;
 import io.github.qianlixy.cache.context.ApplicationContext;
 
 public class DistributedLock {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DistributedLock.class);
 	
 	private static final String KEY_CACHE_MANAGER_LOCK_MAP = "CACHE_MANAGER_LOCK_MAP";
 	
@@ -32,6 +37,9 @@ public class DistributedLock {
 			if(lockFlag != null && lockFlag.byteValue() == LOCK) {
 				map = (Map<String, Byte>) casCacheAdapter.get(KEY_CACHE_MANAGER_LOCK_MAP);
 				lockFlag = (byte) map.get(methodFlag);
+				if(logger.isDebugEnabled()) {
+					logger.debug("The method [{}] is locked", methodFlag);
+				}
 			} else {
 				map.put(methodFlag, LOCK);
 				if(casCacheAdapter.checkAndSet(KEY_CACHE_MANAGER_LOCK_MAP, map, oldCas)) {
