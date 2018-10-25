@@ -1,7 +1,13 @@
 package io.github.qianlixy.cache.context;
 
 /**
- * 获取一致性时间
+ * <p>一致性时间戳</p>
+ * <p>格式规则是：ttttttttttiiiiiiii
+ *   <ol>
+ *     <li>前10位tttttttttt为unix时间戳</li>
+ *     <li>后8位iiiiiiii为增量。位数不够向前补0</li>
+ *   </ol>
+ * 
  * @author qianli_xy@163.com
  * @since 1.0.0
  */

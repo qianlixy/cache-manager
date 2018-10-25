@@ -13,6 +13,8 @@ import redis.clients.jedis.JedisPool;
 
 public class RedisAdapter implements CacheAdapter {
 	
+	private static final String KEY_SYSTEM_TIME_ATOMICITY = "SYSTEM_TIME_ATOMICITY";
+	
 	private static FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 	
 	private static volatile Jedis jedisNode;
@@ -82,7 +84,8 @@ public class RedisAdapter implements CacheAdapter {
 		}
 		try {
 			List<String> time = RedisAdapter.jedisNode.time();
-			return Long.valueOf(time.get(0) + String.format("%06d", Integer.parseInt(time.get(1))));
+			Long incr = jedisCluster.incr(KEY_SYSTEM_TIME_ATOMICITY);
+			return Long.valueOf(time.get(0) + String.format("%08d", incr));
 		} catch (Exception e) {
 			throw new ConsistentTimeException(e);
 		}

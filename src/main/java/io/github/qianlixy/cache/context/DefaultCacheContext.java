@@ -117,6 +117,7 @@ public class DefaultCacheContext implements CacheContext {
 		set(STATIC_UNIQUE_MARK, keyProvider.process(methodName));
 		set(DYNAMIC_UNIQUE_MARK, keyProvider.process(UniqueMethodMarkUtil.uniqueMark(joinPoint)));
 		this.keyProvider = keyProvider;
+		LOGGER.debug("Finish register to cache context");
 	}
 
 	@Override

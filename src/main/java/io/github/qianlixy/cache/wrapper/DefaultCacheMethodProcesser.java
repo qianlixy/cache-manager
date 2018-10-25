@@ -38,7 +38,7 @@ public class DefaultCacheMethodProcesser implements CacheMethodProcesser {
 			CacheContext cacheContext) throws IOException {
 		this.joinPoint = joinPoint;
 		this.cacheContext = cacheContext;
-		this.cacheAdapter = ApplicationContext.getCacheAdaperFactory().buildCacheAdapter();
+		this.cacheAdapter = ApplicationContext.getCacheAdaperFactory().buildCacheAdapter(null);
 		this.cacheTime = ApplicationContext.getDefaultCacheTime();
 		this.fullMethodName = joinPoint.getSignature().toLongString();
 	}

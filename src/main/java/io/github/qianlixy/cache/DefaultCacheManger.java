@@ -60,7 +60,7 @@ public class DefaultCacheManger implements CacheManager {
 		initCahceClientFactory();
 		
 		//初始化缓存方法上下文信息
-		cacheContext = new BeanCacheContext(cacheConfig.getCacheClientFactory().buildCacheAdapter());
+		cacheContext = new BeanCacheContext(cacheConfig.getCacheClientFactory().buildCacheAdapter(null));
 		LOGGER.info("Cache manager initialize CacheContext instance by [{}]", BeanCacheContext.class.getName());
 		
 		//初始化SQLParser
@@ -172,7 +172,7 @@ public class DefaultCacheManger implements CacheManager {
 		AbstractCacheAdapterFactory<?> cacheClientFactory = cacheConfig.getCacheClientFactory();
 		ApplicationContext.set(ApplicationContext.KEY_CACHE_ADAPTER_FACTORY, cacheClientFactory);
 		//赋值全局上下文一致性时间提供者
-		CacheAdapter cacheAdapter = cacheClientFactory.buildCacheAdapter();
+		CacheAdapter cacheAdapter = cacheClientFactory.buildCacheAdapter(null);
 		ApplicationContext.set(ApplicationContext.KEY_CONSISTENT_TIME_PROVIDER, new ConsistentTimeProvider() {
 			@Override
 			public ConsistentTime newInstance() throws ConsistentTimeException {
